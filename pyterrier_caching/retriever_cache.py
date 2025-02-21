@@ -71,7 +71,7 @@ class DbmRetrieverCache(pta.Artifact, pt.Transformer):
                 self.file_name = None
                 it = to_retrieve
                 if self.verbose:
-                    it = pt.tqdm(it, unit='q')
+                    it = pt.tqdm(it, unit='q', desc=f'{self}')
                 for i, key_hash in it:
                     retrieved_results = self.retriever(inp.iloc[i:i+1])
                     results.append(retrieved_results)
