@@ -20,7 +20,7 @@ class Lz4PickleIndexerCache(pta.Artifact, pt.Indexer):
     ARTIFACT_TYPE = 'indexer_cache'
     ARTIFACT_FORMAT = 'lz4pickle'
 
-    def __init__(self, path: Optional[str] = None):
+    def __init__(self, path: Optional[Union[str, Path]] = None):
         """
         Args:
             path: The path to the cache. If None, a temporary cache will be created that is deleted when closed.
