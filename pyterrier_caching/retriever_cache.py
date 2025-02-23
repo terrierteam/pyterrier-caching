@@ -57,6 +57,7 @@ class DbmRetrieverCache(pta.Artifact, pt.Transformer):
             pta.validate.columns(inp, includes=on)
         else:
             on = list(inp.columns)
+            pta.validate.query_frame(inp, warn=True)
         on = tuple(sorted(on))
 
         self._ensure_built(on)
