@@ -84,6 +84,8 @@ class DbmRetrieverCache(pta.Artifact, pt.Transformer):
                          f"the outputs do not contain the cache key: {on}")
                     one_at_a_time = True
                     retrieve_phases = [[idx] for idx in to_retrieve]
+                    if self.verbose:
+                        retrieve_phases = pt.tqdm(retrieve_phases, unit='q', desc=f'{self}')
                 for i, idxs in enumerate(retrieve_phases):
                     retrieved_results = self.retriever(inp.iloc[idxs])
                     retrieved_results.reset_index(drop=True, inplace=True)
