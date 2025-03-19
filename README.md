@@ -14,7 +14,7 @@ pip install pyterrier-caching
 
 ## Documentation
 
-[Full Documention](https://pyterrier.readthedocs.io/en/latest/ext/pyterrier-caching/index.html)
+[Full Documentation](https://pyterrier.readthedocs.io/en/latest/ext/pyterrier-caching/index.html)
 
 Overview:
  - Cache scorer/reranker results with [`ScorerCache`](https://pyterrier.readthedocs.io/en/latest/ext/pyterrier-caching/scorer-cache.html)
