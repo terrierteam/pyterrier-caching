@@ -127,3 +127,28 @@ class TestIndexerCache(unittest.TestCase):
                 self.assertEqual(len(cache), 0)
             with self.subTest('iter'):
                 self.assertEqual(list(cache), [])
+
+    def test_no_docno(self):
+        with tempfile.TemporaryDirectory() as d:
+            d = Path(d)
+            cache = pyterrier_caching.IndexerCache(d/'cache')
+            with self.subTest('len before built'):
+                with self.assertRaises(RuntimeError):
+                    len(cache)
+            cache.index([
+                {'data': 'test'},
+                {'data': 'caching pyterrier'},
+                {'data': 'fetch me some data'},
+                {'data': 'information retrieval'},
+                {'data': 'foo bar baz'},
+            ])
+            with self.subTest('len when built'):
+                self.assertEqual(len(cache), 5)
+            with self.subTest('full iter'):
+                self.assertEqual(list(cache), [
+                    {'data': 'test'},
+                    {'data': 'caching pyterrier'},
+                    {'data': 'fetch me some data'},
+                    {'data': 'information retrieval'},
+                    {'data': 'foo bar baz'},
+                ])

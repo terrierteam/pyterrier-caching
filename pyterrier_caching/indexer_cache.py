@@ -180,7 +180,7 @@ class Lz4PickleIndexerCacheIndexer(pt.Indexer):
                 if docno_lookup is None:
                     if 'docno' in record:
                         docno_lookup = s.enter_context(Lookup.builder(builder.path/'docnos.npids'))
-                if docno_lookup is not False:
+                if docno_lookup is not None and docno_lookup is not False:
                     docno_lookup.add(record['docno'])
                 record_bytes = pickle.dumps(dict(record))
                 fdata.write(lz4.frame.compress(record_bytes))
