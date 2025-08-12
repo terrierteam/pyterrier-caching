@@ -22,3 +22,7 @@ found in the subsequent pages:
    indexer-cache
    retriever-cache
    extras
+
+For more information about caching in PyTerrier, see our WOWS 2025 paper:
+
+.. cite.dblp:: journals/corr/abs-2504-09984
