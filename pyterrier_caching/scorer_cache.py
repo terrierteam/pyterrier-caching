@@ -377,7 +377,15 @@ class Sqlite3ScorerCache(pta.Artifact, pt.Transformer):
 
     def transform(self, inp: pd.DataFrame) -> pd.DataFrame:
         """ Scores the input DataFrame using cached values, scoring any missing ones and adding them to the cache. """
-        pta.validate.columns(inp, includes=[self.group, self.key])
+
+        child_reqs = pt.inspect.transformer_inputs(self.scorer, strict=False)
+        if child_reqs is not None:
+            valid_reqs = [ c for c in child_reqs if "qid" in c and ("docno" in c or "docid" in c) ]
+            with pt.validate.any(inp.columns) as v:
+                for c in valid_reqs:
+                    v.columns(includes=list(set(c) | set([self.group, self.key])))
+        else:
+            pt.validate.columns(inp, includes=[self.group, self.key])
 
         to_score_idxs = []
         to_score_map = {}
@@ -442,6 +450,9 @@ class Sqlite3ScorerCache(pta.Artifact, pt.Transformer):
 
     def __repr__(self):
         return f'Sqlite3ScorerCache({str(self.path)!r}, {self.scorer!r}, group={self.group!r}, key={self.key!r})'
+
+    def _repr_html_(self):
+        return pt.schematic.draw(self, outer_class='repr_html')
 
 # Default implementations
 ScorerCache = Sqlite3ScorerCache
