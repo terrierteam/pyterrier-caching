@@ -1,4 +1,4 @@
-from typing import Optional, Union
+from typing import List, Optional, Union
 from pathlib import Path
 from tempfile import TemporaryDirectory
 from warnings import warn
@@ -13,7 +13,7 @@ import pyterrier_alpha as pta
 from pyterrier_caching import meta_file_compat
 
 
-class DbmRetrieverCache(pta.Artifact, pt.Transformer):
+class DbmRetrieverCache(pt.Artifact, pt.Transformer):
     """A :class:`~pyterrier_caching.RetrieverCache` that stores retrieved results in ``dbm.dumb`` database files."""
     ARTIFACT_TYPE = 'retriever_cache'
     ARTIFACT_FORMAT = 'dbm.dumb'
@@ -22,7 +22,7 @@ class DbmRetrieverCache(pta.Artifact, pt.Transformer):
                  path: Optional[Union[str, Path]] = None,
                  retriever: Optional[pt.Transformer] = None,
                  *,
-                 on: Optional[str] = None,
+                 on: Optional[Union[str, List[str]]] = None,
                  verbose: bool = False):
         """
         Args:
@@ -39,6 +39,7 @@ class DbmRetrieverCache(pta.Artifact, pt.Transformer):
         super().__init__(path)
         meta_file_compat(path)
         self.on = on
+        self._validate_on(on)
         self.retriever = retriever
         self.verbose = verbose
         self.meta = None
@@ -48,16 +49,33 @@ class DbmRetrieverCache(pta.Artifact, pt.Transformer):
             with pta.ArtifactBuilder(self):
                 pass # just create the artifact
 
+    def _validate_on(self, on):
+        if on is None:
+            return
+        if isinstance(on, str):
+            on = [self.on]
+        if 'docno' in on:
+            raise ValueError("The 'docno' column is reserved and cannot be used as a cache key.")
+
     def transform(self, inp: pd.DataFrame) -> pd.DataFrame:
         if self.on is not None:
             if isinstance(self.on, str):
                 on = [self.on]
             else:
-                on = list(self.on)
-            pta.validate.columns(inp, includes=on)
+                on = list(self.on)    
         else:
             on = list(inp.columns)
-            pta.validate.query_frame(inp, warn=True)
+            # we dont use _validate_on here because it happens in the input validation
+
+        child_reqs = pt.inspect.transformer_inputs(self.retriever, strict=False)
+        if child_reqs is not None:
+            valid_reqs = [ c for c in child_reqs if "docno" not in c and "docid" not in c ]
+            with pt.validate.any(inp.columns) as v:
+                for c in valid_reqs:
+                    v.columns(includes=list(set(c) | set(on)), excludes=['docno', 'docid'])
+        else:
+            pt.validate.query_frame(inp, extra_cols=on)
+
         on = tuple(sorted(on))
 
         self._ensure_built(on)
@@ -77,21 +95,25 @@ class DbmRetrieverCache(pta.Artifact, pt.Transformer):
                 to_retrieve.append(i)
                 to_retrieve_hashes.append(key_hash)
 
+        # calculate the output columns. this is needed for detecting one_at_a_time, and
+        # also for returning an empty dataframe for inspection
+        out_cols = pt.inspect.transformer_outputs(self.retriever, list(inp.columns), strict=False)
+        if out_cols is not None and all(o in out_cols for o in on):
+            one_at_a_time = False
+            retrieve_phases = [to_retrieve]
+        else:
+            one_at_a_time = True
+
         # Step 2: Retrieve and save missing results
         if to_retrieve:
             self.file.close()
             self.file = None
             with dbm.dumb.open(self.file_name, 'w') as file:
                 self.file_name = None
-                out_cols = pta.inspect.transformer_outputs(self.retriever, list(inp.columns), strict=False)
-                if out_cols is not None and all(o in out_cols for o in on):
-                    one_at_a_time = False
-                    retrieve_phases = [to_retrieve]
-                else:
-                    warn("Running retriever one query at a time because retriever's outputs could not be determined or "
-                         f"the outputs do not contain the cache key: {on}")
-                    one_at_a_time = True
+                if one_at_a_time:
                     retrieve_phases = [[idx] for idx in to_retrieve]
+                    warn("Running retriever one query at a time because retriever's outputs could not be determined or "
+                        f"the outputs do not contain the cache key: {on}")
                     if self.verbose:
                         retrieve_phases = pt.tqdm(retrieve_phases, unit='q', desc=f'{self}')
                 for i, idxs in enumerate(retrieve_phases):
@@ -113,6 +135,8 @@ class DbmRetrieverCache(pta.Artifact, pt.Transformer):
 
         if self.verbose:
             print(f'{self}: {len(inp)-len(to_retrieve)} hit(s), {len(to_retrieve)} miss(es)')
+        if not results:
+            return pd.DataFrame([], columns=out_cols)
         return pd.concat(results, ignore_index=True)
 
     def _ensure_built(self, on):
@@ -149,6 +173,8 @@ class DbmRetrieverCache(pta.Artifact, pt.Transformer):
     def __repr__(self):
         return f'DbmRetrieverCache({repr(str(self.path))}, {self.retriever})'
 
+    def _repr_html_(self):
+        return pt.schematic.draw(self, outer_class='repr_html')
 
 # Default implementation of RetrieverCache: DbmRetrieverCache
 RetrieverCache = DbmRetrieverCache
