@@ -429,7 +429,7 @@ class Sqlite3ScorerCache(pta.Artifact, pt.Transformer):
         results = inp.assign(**{self.value: values})
         if self.value == 'score':
             pt.model.add_ranks(results)
-        if self.verbose:
+        if self.verbose and len(inp):
             print(f"{self}: {len(inp)-len(to_score_idxs)} hit(s), {len(to_score_idxs)} miss(es)")
         return results
 

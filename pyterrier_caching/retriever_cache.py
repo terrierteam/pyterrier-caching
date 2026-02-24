@@ -133,7 +133,7 @@ class DbmRetrieverCache(pt.Artifact, pt.Transformer):
                         stored_data = {c: group[c].values for c in group.columns}
                         file[key_hash] = lz4.frame.compress(pickle.dumps(stored_data))
 
-        if self.verbose:
+        if self.verbose and len(inp):
             print(f'{self}: {len(inp)-len(to_retrieve)} hit(s), {len(to_retrieve)} miss(es)')
         if not results:
             return pd.DataFrame([], columns=out_cols)
