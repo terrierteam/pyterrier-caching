@@ -451,7 +451,7 @@ class Sqlite3ScorerCache(pta.Artifact, pt.Transformer):
             print(f"merged {count} records from {other} into {self}")
 
     def __repr__(self):
-        return f'Sqlite3ScorerCache({str(self.path)!r}, {self.scorer!r}, group={self.group!r}, key={self.key!r})'
+        return f'Sqlite3ScorerCache({str(self.path)!r}, {self.scorer}, group={self.group!r}, key={self.key!r})'
 
     def _repr_html_(self):
         return pt.schematic.draw(self, outer_class='repr_html')
