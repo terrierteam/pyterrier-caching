@@ -27,6 +27,7 @@ class Hdf5ScorerCache(pta.Artifact, pt.Transformer):
     """
     ARTIFACT_TYPE = 'scorer_cache'
     ARTIFACT_FORMAT = 'hdf5'
+    ARTIFACT_SCHEMATIC_SHOW_AS_TRANSFORMER = True
 
     def __init__(self,
         path: Optional[Union[str, Path]] = None,
@@ -277,6 +278,7 @@ class Sqlite3ScorerCache(pta.Artifact, pt.Transformer):
 
     ARTIFACT_TYPE = 'scorer_cache'
     ARTIFACT_FORMAT = 'sqlite3'
+    ARTIFACT_SCHEMATIC_SHOW_AS_TRANSFORMER = True
 
     def __init__(
         self,

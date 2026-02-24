@@ -17,6 +17,7 @@ class DbmRetrieverCache(pt.Artifact, pt.Transformer):
     """A :class:`~pyterrier_caching.RetrieverCache` that stores retrieved results in ``dbm.dumb`` database files."""
     ARTIFACT_TYPE = 'retriever_cache'
     ARTIFACT_FORMAT = 'dbm.dumb'
+    ARTIFACT_SCHEMATIC_SHOW_AS_TRANSFORMER = True
 
     def __init__(self,
                  path: Optional[Union[str, Path]] = None,
