@@ -56,7 +56,7 @@ Example 2: Cache multiple outputs per key
 
    feature_builder = pt.apply.generic(lambda df: df.assign(
        qlen=df['query'].str.len(),
-       has_question_word=df['query'].str.contains(r'\b(which|how|why)\b', case=False).astype(int),
+       has_question_word=df['query'].str.contains(r'\b(which|how|why)\b', case=False, regex=True).astype(int),
    ))
 
    cached_features = KeyValueCache(
