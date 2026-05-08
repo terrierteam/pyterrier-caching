@@ -19,7 +19,7 @@ the transformer so that it can compute values that are missing from the cache.
      If other columns affect outputs, they must be included in ``key`` too.
    - For a new cache, ``key`` and ``value`` must be provided when constructing the cache.
    - If a key is missing and no backing transformer is provided, a ``LookupError`` is raised.
-   - A ``KeyValueCache`` represents the cross between a transformer and data distribution.
+   - A ``KeyValueCache`` represents the combination of a transformer and data distribution.
      Reusing the same cache with a different transformer can produce invalid results.
 
 Example 1: Cache scores by ``query`` and ``docno``
