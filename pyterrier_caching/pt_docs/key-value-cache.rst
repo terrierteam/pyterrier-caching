@@ -22,28 +22,28 @@ the transformer so that it can compute values that are missing from the cache.
    - A ``KeyValueCache`` represents the combination of a transformer and data distribution.
      Reusing the same cache with a different transformer can produce invalid results.
 
-Example 1: Cache scores by ``query`` and ``docno``
----------------------------------------------------
+Example 1: Cache feature values by ``query`` and ``docno``
+-----------------------------------------------------------
 
 .. code-block:: python
-   :caption: Cache a score-like value with :class:`~pyterrier_caching.KeyValueCache`
+   :caption: Cache a feature value with :class:`~pyterrier_caching.KeyValueCache`
 
    import pyterrier as pt
    from pyterrier_caching import KeyValueCache
 
-   scorer = pt.apply.score(lambda df: 1.0)
-   cached_scorer = KeyValueCache(
+   feature_transformer = pt.apply.generic(lambda df: df.assign(feature=1.0))
+   cached_features = KeyValueCache(
        'path/to/cache',
-       scorer,
+       feature_transformer,
        key=['query', 'docno'],
-       value=['score'],
+       value=['feature'],
    )
 
-   # First call computes and stores score values
-   cached_scorer(topics_and_results_df)
+   # First call computes and stores feature values
+   cached_features(topics_and_results_df)
 
    # Second call reuses cached values for seen (query, docno) pairs
-   cached_scorer(topics_and_results_df)
+   cached_features(topics_and_results_df)
 
 Example 2: Cache multiple outputs per key
 ------------------------------------------
@@ -56,14 +56,14 @@ Example 2: Cache multiple outputs per key
 
    feature_builder = pt.apply.generic(lambda df: df.assign(
        qlen=df['query'].str.len(),
-       has_docno=df['docno'].notna().astype(int),
+       has_question_word=df['query'].str.contains(r'\\b(which|how|why)\\b', case=False).astype(int),
    ))
 
    cached_features = KeyValueCache(
        'path/to/feature-cache',
        feature_builder,
        key=['query', 'docno'],
-       value=['qlen', 'has_docno'],
+       value=['qlen', 'has_question_word'],
    )
 
    # Works as a normal transformer, but only computes misses
