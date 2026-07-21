@@ -12,7 +12,8 @@ You can install ``pyterrier-caching`` with pip:
    $ pip install pyterrier-caching
 
 The right component (:class:`~pyterrier_caching.ScorerCache`, :class:`~pyterrier_caching.IndexerCache`,
-or :class:`~pyterrier_caching.RetrieverCache`) will depend on your use case. More information can be
+:class:`~pyterrier_caching.RetrieverCache`, or :class:`~pyterrier_caching.KeyValueCache`) will depend on
+your use case. More information can be
 found in the subsequent pages:
 
 .. toctree::
@@ -21,6 +22,7 @@ found in the subsequent pages:
    scorer-cache
    indexer-cache
    retriever-cache
+   key-value-cache
    extras
 
 For more information about caching in PyTerrier, see our WOWS 2025 paper:
